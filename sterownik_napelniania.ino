@@ -34,6 +34,7 @@ bool inDispenseMode = false;
 bool resumedFromPowerLoss = false;
 
 float targetStep = 5.0;
+const float leakAlarmThresholdLiters = 5.0;
 
 unsigned long stopPressTime = 0;
 bool stopHeld = false;
@@ -460,7 +461,7 @@ void loop() {
       lastLeakPulseCount = pulsesSnapshot;
       leakAlarmTime = millis();
 
-      if (!leakAlarmShown) {
+      if (!leakAlarmShown && leakLiters >= leakAlarmThresholdLiters) {
         leakAlarmShown = true;
         lcd.clear();
         lcd.print("ALARM! Przeplyw");
@@ -484,6 +485,7 @@ void loop() {
         lcd.print(leakLiters, 3);
         lcd.print(" L");
         delay(5000);
+        lcd.clear();
       }
     }
 
@@ -634,6 +636,7 @@ void loop() {
       beep(800);
       saveLastFullTank(dispensedVolume);
       delay(1000);
+      lcd.clear();
     } else {
       maybeSaveSession();
     }
@@ -650,6 +653,7 @@ void loop() {
       saveSessionNow();
       beep(400);
       delay(1000);
+      lcd.clear();
     }
   }
 }
