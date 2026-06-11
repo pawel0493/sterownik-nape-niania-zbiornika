@@ -74,6 +74,8 @@ const unsigned long stopHoldReset = 1500;
 const unsigned long calibrateHoldMenu = 1500;
 
 void beep(unsigned int ms = 200);
+void beepPattern(unsigned int onMs, unsigned int offMs, byte repeats);
+void showVolumeMessage(const char* line1, float volume, unsigned long displayMs = 2500, byte decimals = 1);
 
 unsigned long getPulseCount() {
   noInterrupts();
@@ -114,6 +116,27 @@ void beep(unsigned int ms) {
   digitalWrite(buzzerPin, HIGH);
   delay(ms);
   digitalWrite(buzzerPin, LOW);
+}
+
+void beepPattern(unsigned int onMs, unsigned int offMs, byte repeats) {
+  for (byte i = 0; i < repeats; i++) {
+    digitalWrite(buzzerPin, HIGH);
+    delay(onMs);
+    digitalWrite(buzzerPin, LOW);
+    if (i + 1 < repeats) {
+      delay(offMs);
+    }
+  }
+}
+
+void showVolumeMessage(const char* line1, float volume, unsigned long displayMs, byte decimals) {
+  lcd.clear();
+  lcd.print(line1);
+  lcd.setCursor(0, 1);
+  lcd.print(volume, decimals);
+  lcd.print(" L");
+  delay(displayMs);
+  lcd.clear();
 }
 
 void resetLeakDetection() {
@@ -470,19 +493,20 @@ void loop() {
 
         while (true) {
           digitalWrite(buzzerPin, HIGH);
+          delay(180);
+          digitalWrite(buzzerPin, LOW);
           if (digitalRead(buttonPlus) == LOW || digitalRead(buttonMinus) == LOW ||
               digitalRead(buttonCalibrate) == LOW || digitalRead(buttonStop) == LOW) {
-            digitalWrite(buzzerPin, LOW);
             delay(300);
             break;
           }
-          delay(50);
+          delay(180);
         }
 
         lcd.clear();
         lcd.print("Nalano przy zamk:");
         lcd.setCursor(0, 1);
-        lcd.print(leakLiters, 3);
+        lcd.print(leakLiters, 2);
         lcd.print(" L");
         delay(5000);
         lcd.clear();
@@ -617,8 +641,8 @@ void loop() {
       inDispenseMode = false;
       lcd.clear();
       lcd.print("Brak przeplywu!");
-      beep(1000);
-      delay(2000);
+      beepPattern(180, 120, 4);
+      delay(1200);
       lcd.clear();
       return;
     }
@@ -633,10 +657,9 @@ void loop() {
       }
 
       inDispenseMode = false;
-      beep(800);
+      beepPattern(120, 100, 3);
       saveLastFullTank(dispensedVolume);
-      delay(1000);
-      lcd.clear();
+      showVolumeMessage("Koniec nalewania", dispensedVolume, 2500, 1);
     } else {
       maybeSaveSession();
     }
@@ -651,9 +674,8 @@ void loop() {
 
       inDispenseMode = false;
       saveSessionNow();
-      beep(400);
-      delay(1000);
-      lcd.clear();
+      beepPattern(150, 100, 2);
+      showVolumeMessage("Zatrzymano recz.", dispensedVolume, 2500, 1);
     }
   }
 }
