@@ -21,7 +21,6 @@ const int addrStep = 24;
 const int addrLastFull = 28;
 
 volatile unsigned long pulseCount = 0;
-volatile unsigned long lastPulseMicros = 0;
 
 float impulsesPerLiter = 450.0;
 float tankCapacity = 100.0;
@@ -97,11 +96,7 @@ void resetPulseCount() {
 }
 
 void flowISR() {
-  unsigned long now = micros();
-  if (now - lastPulseMicros > 2000) {
-    pulseCount++;
-    lastPulseMicros = now;
-  }
+  pulseCount++;
 }
 
 bool isButtonPressedDebounced(int pin, unsigned long debounceMs = 30) {
