@@ -410,6 +410,7 @@ void setup() {
   resetLeakDetection();
 
   if (resumedFromPowerLoss) {
+    setValve(false);
     lcd.clear();
     lcd.print("Wznowic nalewanie?");
     lcd.setCursor(0, 1);
@@ -419,6 +420,8 @@ void setup() {
     bool answered = false;
 
     while (millis() - startTime < 10000) {
+      setValve(false);
+
       if (isButtonPressedDebounced(buttonStop)) {
         beep(350);
         clearSession();
