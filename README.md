@@ -6,7 +6,9 @@ Plik `.ino` do budowy sterownika napełniania wody z zaworem odcinającym.
 ## Pre-ISOBUS: pinout (ESP32 Wemos + MCP2515)
 
 - MCP2515: `SCK=GPIO18`, `MISO=GPIO19`, `MOSI=GPIO23`, `CS=GPIO5`, `INT=GPIO4`
-- I/O sterownika: `FLOW=GPIO27`, `VALVE=GPIO26`, `PLUS=GPIO32`, `MINUS=GPIO33`, `START=GPIO25`, `STOP/RESET=GPIO14`, `BUZZER=GPIO12`
+- I/O sterownika: `FLOW=GPIO27`, `VALVE=GPIO26`
+- Opcjonalnie sygnalizacja dźwiękowa: `BUZZER=GPIO12`
+- Sterowanie lokalnymi przyciskami zostało usunięte (sterowanie wyłącznie z VT/CAN).
 - Zasilanie: 12V (układ wykonawczy), ESP32/MCP2515 zasilane zgodnie z modułami.
 
 ## Pre-ISOBUS: mapowanie CAN (250 kb/s, extended 29-bit)

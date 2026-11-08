@@ -5,13 +5,9 @@
 
 // ===== Gotowy pinout: ESP32 Wemos + MCP2515 =====
 // MCP2515 (SPI): SCK=GPIO18, MISO=GPIO19, MOSI=GPIO23, CS=GPIO5, INT=GPIO4
-// Sterownik: flow=GPIO27, valve=GPIO26, +=GPIO32, -=GPIO33, start=GPIO25, stop/reset=GPIO14, buzzer=GPIO12
+// Sterownik: flow=GPIO27, valve=GPIO26, buzzer=GPIO12
 const int flowSensorPin = 27;
 const int valvePin = 26;
-const int buttonPlus = 32;
-const int buttonMinus = 33;
-const int buttonStart = 25;
-const int buttonStop = 14;
 const int buzzerPin = 12;
 
 const int canCsPin = 5;
@@ -109,14 +105,6 @@ void beep(unsigned int ms = 120) {
   digitalWrite(buzzerPin, HIGH);
   delay(ms);
   digitalWrite(buzzerPin, LOW);
-}
-
-bool isButtonPressedDebounced(int pin, unsigned long debounceMs = 25) {
-  if (digitalRead(pin) == LOW) {
-    delay(debounceMs);
-    return digitalRead(pin) == LOW;
-  }
-  return false;
 }
 
 uint32_t buildJ1939Id(uint8_t priority, uint32_t pgn, uint8_t sourceAddr) {
@@ -343,45 +331,8 @@ void pollCan() {
   }
 }
 
-void handleLocalButtons() {
-  if (isButtonPressedDebounced(buttonPlus)) {
-    targetVolume += targetStep;
-    if (targetVolume > tankCapacity) targetVolume = tankCapacity;
-    beep();
-  }
-
-  if (isButtonPressedDebounced(buttonMinus)) {
-    targetVolume -= targetStep;
-    if (targetVolume < 0) targetVolume = 0;
-    beep();
-  }
-
-  if (isButtonPressedDebounced(buttonStart)) {
-    if (!inDispenseMode && targetVolume > 0) {
-      startDispense();
-      beep(150);
-    }
-  }
-
-  if (isButtonPressedDebounced(buttonStop)) {
-    if (inDispenseMode) {
-      stopDispense(true);
-    } else {
-      setPulseCount(0);
-      dispensedVolume = 0;
-      noFlowAlarm = false;
-      clearSession();
-    }
-    beep(200);
-  }
-}
-
 void setup() {
   pinMode(valvePin, OUTPUT);
-  pinMode(buttonPlus, INPUT_PULLUP);
-  pinMode(buttonMinus, INPUT_PULLUP);
-  pinMode(buttonStart, INPUT_PULLUP);
-  pinMode(buttonStop, INPUT_PULLUP);
   pinMode(buzzerPin, OUTPUT);
   pinMode(flowSensorPin, INPUT_PULLUP);
   pinMode(canIntPin, INPUT_PULLUP);
@@ -407,7 +358,6 @@ void setup() {
 
 void loop() {
   pollCan();
-  handleLocalButtons();
 
   unsigned long pulsesSnapshot = getPulseCount();
   dispensedVolume = pulsesSnapshot / impulsesPerLiter;
